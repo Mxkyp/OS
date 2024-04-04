@@ -1,0 +1,29 @@
+////////CW2 - by Mikołaj Pawłoś////////////
+
+IMPORTANT! to make sure everything is displayed properly make sure your "tabs" '\t' are equal to 8 spaces;
+
+
+The excercise directory contains 4 program files
+- cw1.h - stores the functions prototypes, includes headers of the used libraries, and preprocessor definitions.
+- functions.h - stores the functions used in "cw1.c" uses the cw1.h header file
+- cw1.c - main program file.
+- writeID.c - an example program from which, after using make,an executable is created which you should input as an argument to the main program, to get the desired result
+
+//ABOUT THE PROGRAM
+It's a simple program that run a for loops to create fork 3 times.
+each child "commits suicide" after execlp that prints its process ID's
+
+
+//MAKE
+using make compiles the main program using gcc creating an exe. named "run1" recompiling if there has been any change to the program itself or its headers.
+
+It also creates another exe. the new program to be used to print children process ID statements, 
+called writeID.o which relative location you should input as a command line argument to ./run1 to get the desired result or simply use-make run
+
+the correct program call after using make looks like this:
+- make
+- ./run1 ./writeID.o or simply make run
+- arg[0]  arg[1]
+
+using "make clean" cleans the program of the exe files.
+
