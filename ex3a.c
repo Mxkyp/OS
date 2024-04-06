@@ -48,18 +48,17 @@ void signalManager(char *argv[]){
 }
 
 void my_signal_handler(int sig){
-	printf("\n%d - process number, %s - process name\n",sig,strsignal(sig));
+	printf("\n%d - signal number, %s - signal name\n",sig,strsignal(sig));
 }
 
 void au(int sig){
 	printf("\nAU, got stopped!\n");
 }
 
-int main(int argc,char* argv[]){ 
+int main(int argc,char* argv[]){
+	printf("\nMY PID!-%d\n",getpid());
 	signalManager(argv);
-	while(1){
-		;
-	}
+	pause();
 	return 0;
 }
 
