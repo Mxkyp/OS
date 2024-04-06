@@ -2,6 +2,10 @@
 /*
 Podpunkt (a): jeden program - ustawia obsługę sygnału na 3 sposoby zgodnie z opcją podaną jako argument wywołania programu, a następnie czeka na sygnał (funkcja pause()); numer sygnału przekazywać jako argument wywołania programu; niech proces wypisze na ekranie swój PID, a funkcja do własnej obsługi sygnału jego numer i nazwę (można wstawić krótki sleep).
 
+//zrobiłem
+- funkcje do własnej obsługi sygnału która wypisuje numer sygnału i jego nazwe
+- 
+
 Napisac program do obslugi sygnalow z mozliwosciami: 
 (1) wykonania operacji domyslnej, 
 (2) ignorowania oraz (3) przechwycenia i wlasnej obslugi sygnalu.
@@ -14,19 +18,45 @@ UWAGA: W nowych wersjach Linuksa użycie powyższych opcji kompilatora skutkuje 
 Aby uniknąć podobnych ostrzeżeń dla funkcji getpgid() trzeba dodać makro: #define _XOPEN_SOURCE 500
 Z kolei dla funkcji strsignal() należy dodać makro: #define _GNU_SOURCE
 */
-void alarmSignal(int sig){
-	printf("\nALARAM HALLALAL OOOBPA\n");
+void au(int sig);
+void signalManager(char *argv[]);
+
+void signalManager(char *argv[]){
+	char *controlNames[] = {"SIG_DFL","SIG_IGN","SIG_INTERCEPT"};
+	if(strcmp(argv[2],controlNames[INTERCEPT])==0){
+		if(signal(SIGINT,au) == SIG_ERR){
+			perror("signal-f error!\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if(strcmp(argv[2],controlNames[DEFAULT])==0){
+		printf("SUCCESS!");
+		if(signal(SIGINT,au) == SIG_ERR){
+			perror("signal-f error!\n");
+			exit(EXIT_FAILURE);
+		}
+	}
 }
 
-void alarmSignal(int sig);
+void my_signal_handler(int sig){
+	printf("%d - process number, %s - process name",sig,strsignal(sig));
+}
 
-int main(int argc,char *argv[2]){ 
+void au(int sig){
+	printf("\nAU, got stopped!\n");
+}
 
-	signal(*argv[0],*argv[1]);
-	kill(0,*argv[0]);
-	printf("\n%s",strsignal(SIGKILL));
-	printf("\n22 club\n");
-
+int main(int argc,char* argv[]){ 
+	printf("%s",argv[2]);
+	signalManager(argv);
+	
+	while(1){
+	sleep(5);
+	printf("hello world ;)\n");
+	}
 	return 0;
 }
+
+
 
