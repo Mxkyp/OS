@@ -18,21 +18,29 @@ UWAGA: W nowych wersjach Linuksa użycie powyższych opcji kompilatora skutkuje 
 Aby uniknąć podobnych ostrzeżeń dla funkcji getpgid() trzeba dodać makro: #define _XOPEN_SOURCE 500
 Z kolei dla funkcji strsignal() należy dodać makro: #define _GNU_SOURCE
 */
+
 void au(int sig);
 void signalManager(char *argv[]);
 
 void signalManager(char *argv[]){
+
 	char *controlNames[] = {"SIG_DFL","SIG_IGN","SIG_INTERCEPT"};
+
 	if(strcmp(argv[2],controlNames[INTERCEPT])==0){
-		if(signal(SIGINT,au) == SIG_ERR){
+		if(signal(SIGINT,my_signal_handler) == SIG_ERR){
 			perror("signal-f error!\n");
 			exit(EXIT_FAILURE);
 		}
 	}
 
 	if(strcmp(argv[2],controlNames[DEFAULT])==0){
-		printf("SUCCESS!");
-		if(signal(SIGINT,au) == SIG_ERR){
+		if(signal(SIGINT,SIG_DFL) == SIG_ERR){
+			perror("signal-f error!\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	if(strcmp(argv[2],controlNames[IGNORE])==0){
+		if(signal(SIGINT,SIG_IGN) == SIG_ERR){
 			perror("signal-f error!\n");
 			exit(EXIT_FAILURE);
 		}
@@ -40,7 +48,7 @@ void signalManager(char *argv[]){
 }
 
 void my_signal_handler(int sig){
-	printf("%d - process number, %s - process name",sig,strsignal(sig));
+	printf("\n%d - process number, %s - process name\n",sig,strsignal(sig));
 }
 
 void au(int sig){
@@ -48,12 +56,9 @@ void au(int sig){
 }
 
 int main(int argc,char* argv[]){ 
-	printf("%s",argv[2]);
 	signalManager(argv);
-	
 	while(1){
-	sleep(5);
-	printf("hello world ;)\n");
+		;
 	}
 	return 0;
 }
