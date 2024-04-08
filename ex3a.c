@@ -4,7 +4,12 @@ Podpunkt (a): jeden program - ustawia obsługę sygnału na 3 sposoby zgodnie z 
 
 //zrobiłem
 - funkcje do własnej obsługi sygnału która wypisuje numer sygnału i jego nazwe
-- 
+- funkcje która ustawia obsługę sygnału na 3 sposoby zgodne z opcją wywołania programu
+- proces wypisuje na ekranie swój PID
+- funkcja do włanej obsługi sygnału wypisuje jego numer i nazwę
+- sposób aby numer sygnału przekazywać jako argmunent wywołania programu
+
+//do zrobienia
 
 Napisac program do obslugi sygnalow z mozliwosciami: 
 (1) wykonania operacji domyslnej, 
@@ -23,24 +28,26 @@ void au(int sig);
 void signalManager(char *argv[]);
 
 void signalManager(char *argv[]){
+	char *controlNames[] = {"SIG_DFL","SIG_IGN","SIG_INTERCEPT"}; 
+	int signalNumber = atoi(argv[1]);
 
-	char *controlNames[] = {"SIG_DFL","SIG_IGN","SIG_INTERCEPT"};
+	printf("%d\n",signalNumber);
 
 	if(strcmp(argv[2],controlNames[INTERCEPT])==0){
-		if(signal(SIGINT,my_signal_handler) == SIG_ERR){
+		if(signal(signalNumber,my_signal_handler) == SIG_ERR){
 			perror("signal-f error!\n");
 			exit(EXIT_FAILURE);
 		}
 	}
 
 	if(strcmp(argv[2],controlNames[DEFAULT])==0){
-		if(signal(SIGINT,SIG_DFL) == SIG_ERR){
+		if(signal(signalNumber,SIG_DFL) == SIG_ERR){
 			perror("signal-f error!\n");
 			exit(EXIT_FAILURE);
 		}
 	}
 	if(strcmp(argv[2],controlNames[IGNORE])==0){
-		if(signal(SIGINT,SIG_IGN) == SIG_ERR){
+		if(signal(signalNumber,SIG_IGN) == SIG_ERR){
 			perror("signal-f error!\n");
 			exit(EXIT_FAILURE);
 		}
@@ -56,6 +63,7 @@ void au(int sig){
 }
 
 int main(int argc,char* argv[]){
+
 	printf("\nMY PID!-%d\n",getpid());
 	signalManager(argv);
 	pause();
