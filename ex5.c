@@ -1,48 +1,79 @@
 #include "ex5.h"
 
+
 int main(int argc,char* argv[]){
-	int resultFork,fDescrypt,pipefDescrypt,bytesRead;
 	const char *nameId= {"\nProducer: \0"};
 	const char *buffer[BYTES2];
+	char *consumerFile = argv[1], *producerFile = argv[2], *pipeFile = argv[3], *consumerProgram = argv[4];
+	int resultFork, fDescrypt, pipefDescrypt, bytesRead;
+	int runState = normal_termination;
 
 	
-	if(mkfifo(argv[3],0644) != -1) {
+	if(mkfifo(pipeFile,0644) != -1) {
 		resultFork = fork();	
+
 		switch(resultFork){
-		case -1: perror("\nFORK ERROR\n"); exit(EXIT_FAILURE);
+		case -1: { runState=err_fork; goto errorChecker; }
 		case  0: {
 				sleep(1);
-				execlp(argv[4],argv[0],argv[1],argv[2],argv[3],NULL);
-				break;
+				runState = execlp(consumerProgram,argv[0],consumerFile,producerFile,pipeFile,NULL);
+				if ( runState == -1) { runState = err_execlp; goto errorChecker; }
 			 }
 		default:{
-				fDescrypt = open(argv[2],O_RDONLY,0644); // open the file for writing
-				pipefDescrypt = open(argv[3],O_WRONLY,0644); // open the file for writing
+				runState = producentOpenFiles(&pipefDescrypt,&fDescrypt,producerFile,pipeFile);
+				if ( runState == -1) { runState = err_open; goto errorChecker; }
 
 				while((bytesRead = read(fDescrypt,buffer,BYTES2)) != 0){ // read from the file onto the buffer,save the amount of chars saved
 					sleep(1);
-					if(bytesRead==-1){ perror("READ ERROR"); exit(EXIT_FAILURE); }
-					write(STDOUT_FILENO,nameId,strlen(nameId)); 
-					write(STDOUT_FILENO,buffer,bytesRead); 
-					write(pipefDescrypt,buffer,bytesRead);
+					if(bytesRead==-1){ runState = err_read; goto errorChecker; }
+					else{
+						runState = producentWrite(pipefDescrypt,bytesRead,buffer,nameId);
+						if ( runState == -1) { runState = err_write; goto errorChecker; }
+					}
 				}
-				close(fDescrypt);
-				close(pipefDescrypt);
-				wait(NULL);
+				producentCloseFiles(pipefDescrypt,fDescrypt);
+				if( wait(NULL) == -1) { runState = err_wait; goto errorChecker; }
 			}
-		}
+		};
 	}
 	else{
-		perror("MKFIFO ERROR");
-	 	return -1;
+		runState = err_mkfifo;
+		goto errorChecker;
 	}
-	unlink(argv[3]);
-		return 0;
+	unlink(pipeFile);
+
+	errorChecker: errorHandler(runState);
+
+	return 0;
 }
 
-void producentWrite(int pipefDescrypt,const char* buffer,bytesRead){
+int producentWrite(int pipefDescrypt, int bytesRead, const char *buffer[], const char *nameId){
+      if(write(STDOUT_FILENO,nameId,strlen(nameId)) == -1) { return -1; }
+      else if(write(STDOUT_FILENO,buffer,bytesRead) == -1) { return -1; }
+      else if(write(pipefDescrypt,buffer,bytesRead) == -1) { return -1; }
+      else { return 0; }
+
+}
+
+int producentOpenFiles(int *pipefDescrypt,int *fDescrypt,char *producentFile,char*pipeFile){
+	*fDescrypt = open(producentFile,O_RDONLY,0644); 
+	*pipefDescrypt = open(pipeFile,O_WRONLY,0644); 
+
+	if(*fDescrypt == -1 || *pipefDescrypt == -1) { return -1; }
+	else { return 0; }
+}
+
+int producentCloseFiles(int pipefDescrypt,int fDescrypt){
+	if     (close(pipefDescrypt) == -1) { return -1; }
+	else if(close(pipefDescrypt) == -1) { return -1; }
+	else { return 0; }
+}
 
 
+int errorHandler(int runState){
+	if(runState == normal_termination);
+	printf("HMMHM ROBUST ERROR CHECKING");
+	return 0;
 }
 
 
