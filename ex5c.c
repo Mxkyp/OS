@@ -1,25 +1,69 @@
 #include "ex5.h"
 
 int main(int argc,char* argv[]){
-	int pipefDescrypt,fDescrypt,bytesRead;
 	const char *nameId= {"\nConsumer: \0"};
 	const char *buffer[BYTES];
+	int pipefDescrypt,fDescrypt,bytesRead;
+	int runState = normal_termination; // normal_termination == 0;
+	char *consumerFile = argv[1], *pipeFile = argv[3];
 
-	pipefDescrypt = open(argv[3],O_RDONLY,0644);
-	fDescrypt = open(argv[1],O_WRONLY | O_TRUNC | O_CREAT,0644);
+	runState = consumerOpenFiles(&pipefDescrypt,&fDescrypt,consumerFile,pipeFile);
+	if( runState == -1) { runState = err_open; goto errorChecker; }
 	
 	while((bytesRead = read(pipefDescrypt,buffer,BYTES)) != 0){
-		if(bytesRead==-1){ perror("READ_FAILURE!"); exit(EXIT_FAILURE); }
+		if(bytesRead==-1){ runState = err_read; goto errorChecker; }
 		else{
-			write(fDescrypt,buffer,bytesRead);
-			write(STDOUT_FILENO,nameId,strlen(nameId));
-			write(STDOUT_FILENO,buffer,bytesRead);
+			runState = consumerWrite(fDescrypt,bytesRead,buffer,nameId);
+			if( runState == -1) { runState = err_write; goto errorChecker; }
 		}
 	}
+	
+	runState = consumerCloseFiles(pipefDescrypt,fDescrypt);
+	if(runState == -1) { runState = err_close; goto errorChecker; }
 
-	close(fDescrypt);
-	close(pipefDescrypt);
+	errorChecker: errorHandler(runState);
 		
 	
 		return 0;
+}
+
+int consumerWrite(int fDescrypt, int bytesRead, const char *buffer[], const char *nameId){
+      if(write(STDOUT_FILENO,nameId,strlen(nameId)) == -1) { return -1; }
+      else if(write(STDOUT_FILENO,buffer,bytesRead) == -1) { return -1; }
+      else if(write(fDescrypt,buffer,bytesRead) == -1)     { return -1; }
+      else { return 0; }
+
+}
+
+int consumerOpenFiles(int *pipefDescrypt,int *fDescrypt,char *consumerFile,char*pipeFile){
+	*fDescrypt = open(consumerFile,O_WRONLY | O_CREAT | O_TRUNC,0644); 
+	*pipefDescrypt = open(pipeFile,O_RDONLY,0644); 
+
+	if(*fDescrypt == -1 || *pipefDescrypt == -1) { return -1; }
+	else { return 0; }
+}
+
+int consumerCloseFiles(int pipefDescrypt,int fDescrypt){
+	if     (close(pipefDescrypt) == -1) { return -1; }
+	else if(close(fDescrypt) == -1)     { return -1; }
+	else { return 0; }
+}
+
+void errorHandler(int runState){
+	switch(runState){
+	case normal_termination: printf("ALL GUCCI");
+	     break;
+	case err_mkfifo: perror("mkfifo error"); 
+	     break;
+	case err_fork: perror("fork error"); 
+	     break;
+	case err_open: perror("open error"); 
+	     break;
+	case err_close: perror("close error");
+	     break;
+	case err_write: perror("write error");
+	     break;
+	case err_read: perror("read error");
+	     break;
+	};
 }

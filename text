@@ -1,1 +1,3 @@
-/home/mxkcpy/studia/OS/ex5
+Przy użyciu potoków nazwanych systemu UNIX należy zaimplementować problem "Producenta i Konsumenta" z ćwiczenia 4.
+(a) Należy utworzyć potok FIFO z poziomu programu, a następnie uruchomić procesy Producenta i Konsumenta w tym samym programie (w procesie macierzystym i potomnym lub w dwóch potomnych). Potok należy usunąć w funkcji zarejestrowanej przez atexit.
+(b) Należy sprawdzić, czy potoki FIFO działają dla niezależnych procesów poprzez utworzenie potoku FIFO z linii komend oraz uruchomienie procesów Producenta i Konsumenta niezależnie z poziomu powłoki, na przykład w różnych terminalach – można użyć polecenia:
