@@ -13,13 +13,13 @@ LD=$(CO)
 HEADS=ex5.h
 
 #file names 
-NAME1=ex5
-NAME2=ex5c
-NAME3=extraProgram
+NAME1=producer
+NAME2=consumer
+NAME3=ex5
 
 #text_file names
-TNAME1=producent
-TNAME2=consumer
+TEXT1=$(NAME1).txt
+TEXT2=$(NAME2).txt
 
 #FIFO_PIPE
 PIP=my_fif
@@ -63,24 +63,30 @@ $(EXEC3): $(OBJS3) $(HEADS)
 #======================================
 #Example startup options
 run:
-	./$(EXEC3) ./$(EXEC1) ./$(EXEC2) ./$(TNAME1) ./$(TNAME2) ./$(PIP) 
+	./$(EXEC3) ./$(EXEC1) ./$(EXEC2) ./$(TEXT1) ./$(TEXT2) ./$(PIP) 
 
-runb2:
-	./$(EXEC2) ./$(TNAME2) ./$(PIP)
+consumer:
+	xterm -hold -title $(NAME2) -e ./$(EXEC2) $(TEXT2) $(PIP) 
 
-runb1:
-	./$(EXEC1) ./$(TNAME1) ./$(PIP)
+consumer2:
+	./$(EXEC2) ./$(TEXT2) ./$(PIP)
+
+producer:
+	xterm -hold -title $(NAME1) -e ./$(EXEC1) $(TEXT1) $(PIP) 
+
+producer2:
+	./$(EXEC1) ./$(TEXT1) ./$(PIP)
 
 #=====================================================
 #Utilities
 test:
-	/bin/sh test.sh $(TNAME1) $(TNAME2) 
+	/bin/sh test.sh $(TEXT1) $(TEXT2) 
 pipe:
 	/bin/sh pipe.sh 0644 $(PIP)
 delpipe:
 	rm $(PIP)
 #=====================================================
 clean:
-	rm *.x *.o $(TNAME2) 
+	rm *.x *.o $(TEXT2) 
 tar: 
 	(cd ../; tar -cvzf $(DIR).tar.gz --exclude .git --exclude "*.log" $(DIR))

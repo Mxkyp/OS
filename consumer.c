@@ -7,6 +7,9 @@ int main(int argc,char* argv[]){
 	int runState = normal_termination; // normal_termination == 0;
 	char *consumerFile = argv[1], *pipeFile = argv[2];
 
+	runState = argumentChecker(argc);
+	if( runState == -1) { runState = err_argc; goto errorChecker; }
+
 	runState = consumerOpenFiles(&pipefDescrypt,&fDescrypt,consumerFile,pipeFile);
 	if( runState == -1) { runState = err_open; goto errorChecker; }
 	
@@ -22,10 +25,17 @@ int main(int argc,char* argv[]){
 	
 	if(runState != normal_termination){
 		errorChecker: errorHandler(runState);
+		return -1;
 	}
 		
 	
 		return 0;
+}
+
+int argumentChecker(int argc){
+	if(argc != 3) { return -1;}
+	else { return 0; }
+
 }
 
 int consumerWrite(int fDescrypt, int bytesRead, const char *buffer[], const char *nameId){
@@ -52,6 +62,8 @@ int consumerCloseFiles(int pipefDescrypt,int fDescrypt){
 
 void errorHandler(int runState){
 	switch(runState){
+	case err_argc: perror("argc error");
+	     break;
 	case err_open: perror("open error"); 
 	     break;
 	case err_close: perror("close error");
