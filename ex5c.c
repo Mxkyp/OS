@@ -12,16 +12,17 @@ int main(int argc,char* argv[]){
 	
 	while((bytesRead = read(pipefDescrypt,buffer,BYTES)) != 0){
 		if(bytesRead==-1){ runState = err_read; goto errorChecker; }
-		else{
-			runState = consumerWrite(fDescrypt,bytesRead,buffer,nameId);
-			if( runState == -1) { runState = err_write; goto errorChecker; }
-		}
+
+		runState = consumerWrite(fDescrypt,bytesRead,buffer,nameId);
+		if( runState == -1) { runState = err_write; goto errorChecker; }
 	}
 	
 	runState = consumerCloseFiles(pipefDescrypt,fDescrypt);
 	if(runState == -1) { runState = err_close; goto errorChecker; }
-
-	errorChecker: errorHandler(runState);
+	
+	if(runState != normal_termination){
+		errorChecker: errorHandler(runState);
+	}
 		
 	
 		return 0;
@@ -51,12 +52,6 @@ int consumerCloseFiles(int pipefDescrypt,int fDescrypt){
 
 void errorHandler(int runState){
 	switch(runState){
-	case normal_termination: printf("ALL GUCCI");
-	     break;
-	case err_mkfifo: perror("mkfifo error"); 
-	     break;
-	case err_fork: perror("fork error"); 
-	     break;
 	case err_open: perror("open error"); 
 	     break;
 	case err_close: perror("close error");

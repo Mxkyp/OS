@@ -19,10 +19,11 @@ int main(int argc,char* argv[]){
 	
 	if(mkfifo(pipeFile,0644) == -1) { runState = err_mkfifo; goto errorChecker; }
 
+	runState = atexit(pipeClose);
+	if(runState != normal_termination){ runState = err_atexit; goto errorChecker; }
+
 	for(int i=0;i<2; i++){							     
 		resultFork[i] = fork();	
-		runState = atexit(pipeClose);
-		if(runState != normal_termination){ runState = err_atexit; goto errorChecker; }
 
 		switch(resultFork[i]){
 		case -1: { runState=err_fork; goto errorChecker; }
@@ -40,8 +41,9 @@ int main(int argc,char* argv[]){
 		if(runState == -1) { runState = err_wait; goto errorChecker; }
 	}
 
-
-	errorChecker:errorHandler(runState);
+	if(runState != normal_termination){
+		errorChecker:errorHandler(runState);
+	}
 
 	return 0;	
 }
@@ -59,8 +61,6 @@ void pipeClose(){
 
 void errorHandler(int runState){
 	switch(runState){
-	case normal_termination: printf("ALL GUCCI");
-	     break;
 	case err_mkfifo: perror("mkfifo error"); 
 	     break;
 	case err_fork: perror("fork error"); 
