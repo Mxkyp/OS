@@ -64,8 +64,10 @@ that also serves as a cleaning and archiving utility.
 ->  to create the pipe write:
         make pipe
 
+NOTE! to run both the consumer and produer programs you'll need 2 seperate console windows
+-----
 ->  to run the CONSUMER PROGRAM (USING XTERM) write 
-       make consumer
+       make consumer  
 
 ->  to run the PRODUCER PROGRAM (USING XTERM) write 
        make producer 
