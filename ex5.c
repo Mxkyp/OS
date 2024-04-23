@@ -9,18 +9,18 @@ int main(int argc,char* argv[]){
 	int runState = normal_termination; // normal_termination == 0;
 
 	
-		runState = producentOpenFiles(&pipefDescrypt,&fDescrypt,producerFile,pipeFile);
-		if ( runState == -1) { runState = err_open; goto errorChecker; }
+	runState = producentOpenFiles(&pipefDescrypt,&fDescrypt,producerFile,pipeFile);
+	if ( runState == -1) { runState = err_open; goto errorChecker; }
 
-		while((bytesRead = read(fDescrypt,buffer,BYTES2)) != 0){ // read from the file onto the buffer,save the amount of chars saved
-			sleep(1);
-			if(bytesRead == -1){ runState = err_read; goto errorChecker; }
-			else{
-				runState = producentWrite(pipefDescrypt,bytesRead,buffer,nameId);
-				if ( runState == -1) { runState = err_write; goto errorChecker; }
-			}
+	while((bytesRead = read(fDescrypt,buffer,BYTES2)) != 0){ // read from the file onto the buffer,save the amount of chars saved
+		sleep(1);
+		if(bytesRead == -1){ runState = err_read; goto errorChecker; }
+		else{
+			runState = producentWrite(pipefDescrypt,bytesRead,buffer,nameId);
+			if ( runState == -1) { runState = err_write; goto errorChecker; }
 		}
-		producentCloseFiles(pipefDescrypt,fDescrypt);
+	}
+	producentCloseFiles(pipefDescrypt,fDescrypt);
 	
 
 	if(runState != normal_termination){
@@ -55,15 +55,6 @@ int producentCloseFiles(int pipefDescrypt,int fDescrypt){
 
 void errorHandler(int runState){
 	switch(runState){
-	case normal_termination: printf("ALL GUCCI");
-	     break;
-	case err_mkfifo: perror("mkfifo error"); 
-	     break;
-	case err_fork: perror("fork error"); 
-	     break;
-	case err_execlp: perror("execlp error"); 
-	     _exit(EXIT_FAILURE);
-	     break;
 	case err_open: perror("open error"); 
 	     break;
 	case err_close: perror("close error");
@@ -73,8 +64,6 @@ void errorHandler(int runState){
 	case err_read: perror("read error");
 	     break;
 	case err_unlink: perror("unlink error");
-	     break;
-	case err_wait: perror("wait error");
 	     break;
 	};
 }

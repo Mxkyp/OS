@@ -18,6 +18,7 @@ enum error_types { normal_termination=0, err_mkfifo, err_fork, err_execlp, err_o
 #define WRITE 1
 
 //minor functions
+void pipeClose();
 void argumentChecker(int argc);
 void errorHandler(int errType);
 void randomSleep();

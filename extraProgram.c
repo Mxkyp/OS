@@ -1,9 +1,11 @@
 #include "ex5.h"
 
+char* pipeFile;
 
-int main(int argc,char* argv[]){
+int main(int argc,char* argv[]){ 
+	pipeFile = argv[5];
 	char *producerProgram = argv[1],*consumerProgram = argv[2];
-	char *producerFile = argv[3],*consumerFile = argv[4], *pipeFile = argv[5]; 
+	char *producerFile = argv[3],*consumerFile = argv[4]; 
 	char *subProgram[2],*subFile[2];
 	subProgram[0] = producerProgram;
 	subProgram[1] = consumerProgram;
@@ -19,13 +21,15 @@ int main(int argc,char* argv[]){
 
 	for(int i=0;i<2; i++){							     
 		resultFork[i] = fork();	
-		//runState = atexit(pipeClose);
-		//if(runState != normal_termination){ runState = err_atexit; goto errorChecker; }// here
+		runState = atexit(pipeClose);
+		if(runState != normal_termination){ runState = err_atexit; goto errorChecker; }
+
 		switch(resultFork[i]){
 		case -1: { runState=err_fork; goto errorChecker; }
 		case  0: {	
 
-				launch(subProgram[i],argv,subFile[i],pipeFile);// add this to header
+				runState = launch(subProgram[i],argv,subFile[i],pipeFile);
+				if(runState == -1) { runState = err_execlp; goto errorChecker; }
 
 			 }
 		};
@@ -36,7 +40,6 @@ int main(int argc,char* argv[]){
 		if(runState == -1) { runState = err_wait; goto errorChecker; }
 	}
 
-	unlink(pipeFile);
 
 	errorChecker:errorHandler(runState);
 
@@ -48,6 +51,10 @@ int launch(char*programToLaunch,char*argv[],char*programFile,char*pipeFile){ // 
 		return -1;
 	}
 	else {	return 0; }
+}
+
+void pipeClose(){
+	unlink(pipeFile);
 }
 
 void errorHandler(int runState){
