@@ -5,7 +5,7 @@ int main(int argc,char* argv[]){
 	const char *buffer[BYTES];
 	int pipefDescrypt,fDescrypt,bytesRead;
 	int runState = normal_termination; // normal_termination == 0;
-	char *consumerFile = argv[1], *pipeFile = argv[3];
+	char *consumerFile = argv[1], *pipeFile = argv[2];
 
 	runState = consumerOpenFiles(&pipefDescrypt,&fDescrypt,consumerFile,pipeFile);
 	if( runState == -1) { runState = err_open; goto errorChecker; }

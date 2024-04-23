@@ -4,47 +4,25 @@
 int main(int argc,char* argv[]){
 	const char *nameId= {"\nProducer: \0"};
 	const char *buffer[BYTES2];
-	char *consumerFile = argv[1], *producerFile = argv[2], *pipeFile = argv[3], *consumerProgram = argv[4];
-	int resultFork, fDescrypt, pipefDescrypt, bytesRead;
+	char *producerFile = argv[1],*pipeFile = argv[2]; 
+	int fDescrypt, pipefDescrypt, bytesRead;
 	int runState = normal_termination; // normal_termination == 0;
 
 	
-	if(mkfifo(pipeFile,0644) != -1) {
-		resultFork = fork();	
+		runState = producentOpenFiles(&pipefDescrypt,&fDescrypt,producerFile,pipeFile);
+		if ( runState == -1) { runState = err_open; goto errorChecker; }
 
-		//runState = atexit(pipeClose);
-		//if(runState != normal_termination){ runState = err_atexit; goto errorChecker; }// here
-											     
-		switch(resultFork){
-		case -1: { runState=err_fork; goto errorChecker; }
-		case  0: {
-				sleep(1);
-				runState = execlp(consumerProgram,argv[0],consumerFile,producerFile,pipeFile,NULL);
-				if ( runState == -1) { runState = err_execlp; goto errorChecker; }
-			 }
-		default:{
-				runState = producentOpenFiles(&pipefDescrypt,&fDescrypt,producerFile,pipeFile);
-				if ( runState == -1) { runState = err_open; goto errorChecker; }
-
-				while((bytesRead = read(fDescrypt,buffer,BYTES2)) != 0){ // read from the file onto the buffer,save the amount of chars saved
-					sleep(1);
-					if(bytesRead == -1){ runState = err_read; goto errorChecker; }
-					else{
-						runState = producentWrite(pipefDescrypt,bytesRead,buffer,nameId);
-						if ( runState == -1) { runState = err_write; goto errorChecker; }
-					}
-				}
-				producentCloseFiles(pipefDescrypt,fDescrypt);
-				if( wait(NULL) == -1) { runState = err_wait; goto errorChecker; }
+		while((bytesRead = read(fDescrypt,buffer,BYTES2)) != 0){ // read from the file onto the buffer,save the amount of chars saved
+			sleep(1);
+			if(bytesRead == -1){ runState = err_read; goto errorChecker; }
+			else{
+				runState = producentWrite(pipefDescrypt,bytesRead,buffer,nameId);
+				if ( runState == -1) { runState = err_write; goto errorChecker; }
 			}
-		};
-	}
-	else{
-		runState = err_mkfifo;
-		goto errorChecker;
-	}
+		}
+		producentCloseFiles(pipefDescrypt,fDescrypt);
+	
 
-	unlink(pipeFile);
 	if(runState != normal_termination){
 		errorChecker: errorHandler(runState);
 	}
@@ -101,5 +79,9 @@ void errorHandler(int runState){
 	};
 }
 
-
-
+/*
+	sleep(1);
+				runState = execlp(consumerProgram,argv[0],consumerFile,producerFile,pipeFile,NULL);
+				if ( runState == -1) { runState = err_execlp; goto errorChecker; }
+			 }
+*/
