@@ -21,6 +21,7 @@ enum error_types { normal_termination=0, err_mkfifo, err_fork, err_execlp, err_o
 void argumentChecker(int argc);
 void errorHandler(int errType);
 void randomSleep();
+int launch(char*programToLaunch,char*argv[],char*programFile,char*pipeFile);
 int producentOpenFiles(int *pipefDescrypt,int *fDescrypt,char *producentFile,char*pipeFile);
 int producentCloseFiles(int pipefDescrypt,int fDescrypt);
 int consumerOpenFiles(int *pipefDescrypt,int *fDescrypt,char *consumerFile,char*pipeFile);
