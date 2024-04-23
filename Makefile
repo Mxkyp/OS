@@ -64,8 +64,21 @@ $(EXEC3): $(OBJS3) $(HEADS)
 #Example startup options
 run:
 	./$(EXEC3) ./$(EXEC1) ./$(EXEC2) ./$(TNAME1) ./$(TNAME2) ./$(PIP) 
+
+runb2:
+	./$(EXEC2) ./$(TNAME2) ./$(PIP)
+
+runb1:
+	./$(EXEC1) ./$(TNAME1) ./$(PIP)
+
+#=====================================================
+#Utilities
 test:
 	/bin/sh test.sh $(TNAME1) $(TNAME2) 
+pipe:
+	/bin/sh pipe.sh 0644 $(PIP)
+delpipe:
+	rm $(PIP)
 #=====================================================
 clean:
 	rm *.x *.o $(TNAME2) 
